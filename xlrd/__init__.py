@@ -303,7 +303,9 @@ from . import licences
 # statement.</p>
 ##
 
-import sys, zipfile, pprint
+import sys
+import zipfile
+import pprint
 from . import timemachine
 from .biffh import (
     XLRDError,
@@ -316,9 +318,10 @@ from .biffh import (
     XL_CELL_EMPTY,
     XL_CELL_DATE,
     XL_CELL_NUMBER
-    )
-from .formula import * # is constrained by __all__
-from .book import Book, colname #### TODO #### formula also has `colname` (restricted to 256 cols)
+)
+from .formula import *  # is constrained by __all__
+# TODO #### formula also has `colname` (restricted to 256 cols)
+from .book import Book, colname
 from .sheet import empty_cell
 from .xldate import XLDateError, xldate_as_tuple
 from .xlsx import X12Book
@@ -378,23 +381,25 @@ USE_MMAP = MMAP_AVAILABLE
 #
 # @return An instance of the Book class.
 
+
 def open_workbook(filename=None,
-    logfile=sys.stdout,
-    verbosity=0,
-    use_mmap=USE_MMAP,
-    file_contents=None,
-    encoding_override=None,
-    formatting_info=False,
-    on_demand=False,
-    ragged_rows=False,
-    ):
+                  logfile=sys.stdout,
+                  verbosity=0,
+                  use_mmap=USE_MMAP,
+                  file_contents=None,
+                  encoding_override=None,
+                  formatting_info=False,
+                  on_demand=False,
+                  ragged_rows=False,
+                  suppress_locate_stream_error=False,
+                  ):
     peeksz = 4
     if file_contents:
         peek = file_contents[:peeksz]
     else:
         with open(filename, "rb") as f:
             peek = f.read(peeksz)
-    if peek == b"PK\x03\x04": # a ZIP file
+    if peek == b"PK\x03\x04":  # a ZIP file
         if file_contents:
             zf = zipfile.ZipFile(timemachine.BYTES_IO(file_contents))
         else:
@@ -420,7 +425,7 @@ def open_workbook(filename=None,
                 formatting_info=formatting_info,
                 on_demand=on_demand,
                 ragged_rows=ragged_rows,
-                )
+            )
             return bk
         if 'xl/workbook.bin' in component_names:
             raise XLRDError('Excel 2007 xlsb file; not supported')
@@ -439,7 +444,8 @@ def open_workbook(filename=None,
         formatting_info=formatting_info,
         on_demand=on_demand,
         ragged_rows=ragged_rows,
-        )
+        suppress_locate_stream_error=suppress_locate_stream_error
+    )
     return bk
 
 ##
@@ -447,6 +453,7 @@ def open_workbook(filename=None,
 # @param filename The path to the file to be dumped.
 # @param outfile An open file, to which the dump is written.
 # @param unnumbered If true, omit offsets (for meaningful diffs).
+
 
 def dump(filename, outfile=sys.stdout, unnumbered=False):
     from .biffh import biff_dump
@@ -459,6 +466,7 @@ def dump(filename, outfile=sys.stdout, unnumbered=False):
 # I.e. produce a sorted file of (record_name, count).
 # @param filename The path to the file to be summarised.
 # @param outfile An open file, to which the summary is written.
+
 
 def count_records(filename, outfile=sys.stdout):
     from .biffh import biff_count_records
